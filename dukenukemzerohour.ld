@@ -1,7 +1,6 @@
 SECTIONS
 {
-    __romPos = 0x0;
-    . = __romPos;
+    __romPos = 0;
     header_ROM_START = __romPos;
     header_VRAM = ADDR(.header);
     .header : AT(header_ROM_START) SUBALIGN(16)
@@ -12,11 +11,9 @@ SECTIONS
         build/asm/header.s.o(.data);
         header_DATA_END = .;
     }
-    header_ROM_END = 0x40;
-    __romPos = 0x40;
+    __romPos += SIZEOF(.header);
+    header_ROM_END = boot_ROM_START;
 
-    __romPos = 0x40;
-    . = __romPos;
     boot_ROM_START = __romPos;
     boot_VRAM = ADDR(.boot);
     .boot : AT(boot_ROM_START) SUBALIGN(16)
@@ -27,11 +24,10 @@ SECTIONS
         build/assets/boot.bin.o(.data);
         boot_DATA_END = .;
     }
-    boot_ROM_END = 0x1000;
-    __romPos = 0x1000;
+    __romPos += SIZEOF(.boot);
+    boot_ROM_END = main_ROM_START;
 
-    __romPos = 0x1000;
-    . = __romPos;
+    __romPos = (__romPos + 15) & ~15; /* align 16 */
     main_ROM_START = __romPos;
     main_VRAM = ADDR(.main);
     .main 0x80000400 : AT(main_ROM_START) SUBALIGN(16)
@@ -209,7 +205,7 @@ SECTIONS
         build/src/BB5A0.c.o(.text);
         build/src/BB670.c.o(.text);
         build/src/BB6A0.c.o(.text);
-        build/src/BB710.c.o(.text);
+        build/asm/BB710.s.o(.text);
         build/src/BB980.c.o(.text);
         build/src/BBC40.c.o(.text);
         build/src/BBD40.c.o(.text);
@@ -559,14 +555,16 @@ SECTIONS
         build/src/BB670.c.o(.data);
         BB6A0_c = .;
         build/src/BB6A0.c.o(.data);
-        BB710_c = .;
-        build/src/BB710.c.o(.data);
+        BB710_s = .;
+        build/asm/BB710.s.o(.data);
         BB980_c = .;
         build/src/BB980.c.o(.data);
         BBC40_c = .;
         build/src/BBC40.c.o(.data);
         BBD40_c = .;
         build/src/BBD40.c.o(.data);
+        main_DATA_END = .;
+        main_RODATA_START = .;
         build/asm/entrypoint.s.o(.rodata);
         build/src/1050.c.o(.rodata);
         build/src/4590.c.o(.rodata);
@@ -739,11 +737,15 @@ SECTIONS
         build/src/BB5A0.c.o(.rodata);
         build/src/BB670.c.o(.rodata);
         build/src/BB6A0.c.o(.rodata);
-        build/src/BB710.c.o(.rodata);
+        build/asm/BB710.s.o(.rodata);
         build/src/BB980.c.o(.rodata);
         build/src/BBC40.c.o(.rodata);
         build/src/BBD40.c.o(.rodata);
-        main_DATA_END = .;
+        main_RODATA_END = .;
+    }
+    main_entrypoint_bss_VRAM = ADDR(.main_entrypoint_bss);
+    .main_entrypoint_bss (NOLOAD) : SUBALIGN(16)
+    {
         main_BSS_START = .;
         build/asm/entrypoint.s.o(.bss);
         build/src/1050.c.o(.bss);
@@ -917,17 +919,15 @@ SECTIONS
         build/src/BB5A0.c.o(.bss);
         build/src/BB670.c.o(.bss);
         build/src/BB6A0.c.o(.bss);
-        build/src/BB710.c.o(.bss);
+        build/asm/BB710.s.o(.bss);
         build/src/BB980.c.o(.bss);
         build/src/BBC40.c.o(.bss);
         build/src/BBD40.c.o(.bss);
         main_BSS_END = .;
     }
-    main_ROM_END = 0xBBD50;
-    __romPos = 0xBBD50;
+    __romPos += SIZEOF(.main);
+    main_ROM_END = BBD50_ROM_START;
 
-    __romPos = 0xBBD50;
-    . = __romPos;
     BBD50_ROM_START = __romPos;
     BBD50_VRAM = ADDR(.BBD50);
     .BBD50 : AT(BBD50_ROM_START) SUBALIGN(16)
@@ -938,8 +938,8 @@ SECTIONS
         build/assets/BBD50.bin.o(.data);
         BBD50_DATA_END = .;
     }
-    BBD50_ROM_END = 0x2000000;
-    __romPos = 0x2000000;
+    __romPos += SIZEOF(.BBD50);
+    BBD50_ROM_END = __romPos;
 
     /DISCARD/ :
     {

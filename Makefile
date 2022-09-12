@@ -83,7 +83,7 @@ ENDLINE := \n'
 
 ### Compiler Options ###
 
-ASFLAGS        := -G 0 -I include -mips2 -mabi=32
+ASFLAGS        := -G 0 -I include -mips3 -mabi=32
 CFLAGS         := -G0 -mips3 -mgp32 -mfp32 -Wa,--vr4300mul-off
 CPPFLAGS       := -I include -I $(BUILD_DIR)/include -I src -DF3DEX_GBI_2
 LDFLAGS        := -T symbol_addrs.txt -T undefined_syms.txt -T undefined_funcs.txt -T undefined_funcs_auto.txt -T undefined_syms_auto.txt -T $(LD_SCRIPT) -Map $(LD_MAP) --no-check-sections
